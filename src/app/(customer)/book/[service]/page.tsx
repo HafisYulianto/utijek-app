@@ -13,11 +13,14 @@ import { calculatePrice, getServiceLabel, getServiceIcon } from '@/lib/utils/pri
 import { useRealtimeOrders } from '@/hooks/useRealtimeOrders'
 import type { ServiceType, PricingConfig, Order } from '@/types/database.types'
 import LiveChatDrawer from '@/components/customer/LiveChatDrawer'
+import LocationSearchInput from '@/components/customer/LocationSearchInput'
+import { POPULAR_LOCATIONS } from '@/lib/data/lampungLocations'
 import {
   MapPinIcon,
   ArrowRightIcon,
   ChevronUpIcon,
   XMarkIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/solid'
 
 const LiveMap = dynamic(() => import('@/components/map/LiveMap'), { ssr: false })
@@ -126,18 +129,26 @@ export default function BookingPage() {
     return () => { supabase.removeChannel(channel) }
   }, [currentOrder?.driver_id])
 
+  const [manualMapTarget, setManualMapTarget] = useState<'pickup' | 'dropoff' | null>(null)
+
   const handleMapClick = useCallback(
     (coords: [number, number], address: string) => {
-      if (selectingFor === 'pickup') {
+      // If manual map mode is not explicitly enabled, do nothing to prevent accidental clicks
+      if (!manualMapTarget) return
+
+      if (manualMapTarget === 'pickup') {
         setPickupCoords(coords)
         setPickupAddress(address)
-        if (needsDropoff) setSelectingFor('dropoff')
+        toast.success('📍 Titik jemput dipilih dari peta')
+        setManualMapTarget(needsDropoff && !dropoffCoords ? 'dropoff' : null)
       } else {
         setDropoffCoords(coords)
         setDropoffAddress(address)
+        toast.success('🏁 Titik antar dipilih dari peta')
+        setManualMapTarget(null)
       }
     },
-    [selectingFor, needsDropoff]
+    [manualMapTarget, needsDropoff, dropoffCoords]
   )
 
   const handleSubmitOrder = async () => {
@@ -223,14 +234,22 @@ export default function BookingPage() {
           height="100%"
         />
 
-        {/* Map instruction overlay */}
-        {step === 'input' && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-4 py-2 rounded-full backdrop-blur-sm">
-            {!pickupCoords
-              ? '📍 Ketuk peta untuk titik jemput'
-              : !dropoffCoords && needsDropoff
-              ? '🏁 Ketuk peta untuk titik antar'
-              : '✓ Lokasi dipilih'}
+        {/* Manual map mode banner */}
+        {manualMapTarget && (
+          <div className="absolute top-16 left-4 right-4 z-20 bg-amber-500/95 text-white px-4 py-2.5 rounded-2xl shadow-lg flex items-center justify-between backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🗺️</span>
+              <p className="text-xs font-bold">
+                Ketuk di peta untuk Titik {manualMapTarget === 'pickup' ? 'Jemput' : 'Antar'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setManualMapTarget(null)}
+              className="px-2.5 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-[11px] font-bold"
+            >
+              Selesai
+            </button>
           </div>
         )}
       </div>
@@ -257,39 +276,88 @@ export default function BookingPage() {
           {/* INPUT STEP */}
           {step === 'input' && (
             <div className="space-y-4">
-              {/* Pickup input */}
-              <div>
-                <label className="label">Titik Jemput</label>
-                <button
-                  className="w-full text-left flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl"
-                  onClick={() => setSelectingFor('pickup')}
-                  id="btn-select-pickup"
-                >
-                  <MapPinIcon className="w-5 h-5 text-uti-maroon flex-shrink-0" />
-                  <span className={`text-sm truncate ${pickupAddress ? 'text-gray-900' : 'text-gray-400'}`}>
-                    {pickupAddress || 'Ketuk peta atau ketuk di sini'}
-                  </span>
-                </button>
-              </div>
+              {/* Pickup location search */}
+              <LocationSearchInput
+                label="Titik Jemput"
+                type="pickup"
+                value={pickupAddress}
+                coords={pickupCoords}
+                onSelect={(item) => {
+                  setPickupAddress(item.name)
+                  setPickupCoords(item.coords)
+                  setManualMapTarget(null)
+                }}
+                onClear={() => {
+                  setPickupAddress('')
+                  setPickupCoords(null)
+                }}
+                onManualMapPick={() => {
+                  setManualMapTarget('pickup')
+                  toast('Silakan ketuk titik di peta untuk jemput', { icon: '📍' })
+                }}
+                isManualMapActive={manualMapTarget === 'pickup'}
+                placeholder="Ketik nama tempat jemput (cth: Teknokrat...)"
+              />
 
-              {/* Dropoff input */}
+              {/* Dropoff location search */}
               {needsDropoff && (
-                <div>
-                  <label className="label">Titik Antar</label>
-                  <button
-                    className="w-full text-left flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl"
-                    onClick={() => setSelectingFor('dropoff')}
-                    id="btn-select-dropoff"
-                  >
-                    <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
-                      <div className="w-3 h-3 rounded-full bg-blue-500" />
-                    </div>
-                    <span className={`text-sm truncate ${dropoffAddress ? 'text-gray-900' : 'text-gray-400'}`}>
-                      {dropoffAddress || 'Ketuk peta atau ketuk di sini'}
-                    </span>
-                  </button>
-                </div>
+                <LocationSearchInput
+                  label="Titik Antar (Tujuan)"
+                  type="dropoff"
+                  value={dropoffAddress}
+                  coords={dropoffCoords}
+                  onSelect={(item) => {
+                    setDropoffAddress(item.name)
+                    setDropoffCoords(item.coords)
+                    setManualMapTarget(null)
+                  }}
+                  onClear={() => {
+                    setDropoffAddress('')
+                    setDropoffCoords(null)
+                  }}
+                  onManualMapPick={() => {
+                    setManualMapTarget('dropoff')
+                    toast('Silakan ketuk titik di peta untuk tujuan antar', { icon: '🏁' })
+                  }}
+                  isManualMapActive={manualMapTarget === 'dropoff'}
+                  placeholder="Ketik nama tujuan antar (cth: MBK, Unila...)"
+                />
               )}
+
+              {/* Quick Popular Chips */}
+              <div className="pt-1">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <SparklesIcon className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-[11px] font-bold text-gray-500">Paling Sering Dituju:</span>
+                </div>
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  {POPULAR_LOCATIONS.slice(0, 6).map((loc) => (
+                    <button
+                      key={loc.name}
+                      type="button"
+                      onClick={() => {
+                        if (!pickupCoords) {
+                          setPickupAddress(loc.name)
+                          setPickupCoords(loc.coords)
+                          toast.success(`📍 Jemput: ${loc.name.split('(')[0].trim()}`)
+                        } else if (needsDropoff && !dropoffCoords) {
+                          setDropoffAddress(loc.name)
+                          setDropoffCoords(loc.coords)
+                          toast.success(`🏁 Antar: ${loc.name.split('(')[0].trim()}`)
+                        } else {
+                          setDropoffAddress(loc.name)
+                          setDropoffCoords(loc.coords)
+                          toast.success(`🏁 Antar diubah: ${loc.name.split('(')[0].trim()}`)
+                        }
+                      }}
+                      className="shrink-0 px-3 py-1.5 bg-gray-100 hover:bg-uti-maroon-50 hover:text-uti-maroon text-gray-700 text-xs font-semibold rounded-full border border-gray-200 transition-all flex items-center gap-1.5 active:scale-95"
+                    >
+                      <span>{loc.icon}</span>
+                      <span>{loc.name.split('(')[0].trim()}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Item details for UTIKAN/UTITIP */}
               {(serviceType === 'utikan' || serviceType === 'utitip') && (

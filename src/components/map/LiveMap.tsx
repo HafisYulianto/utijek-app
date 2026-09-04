@@ -34,8 +34,8 @@ export default function LiveMap({
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [107.6191, -6.9175], // Bandung default
-      zoom: 13,
+      center: [105.257723, -5.381786], // Universitas Teknokrat Indonesia, Bandar Lampung
+      zoom: 15,
     })
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right')

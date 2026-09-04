@@ -83,7 +83,7 @@ export default async function HomePage() {
       {/* Active Order Banner */}
       {activeOrder && (
         <Link
-          href={`/orders/${activeOrder.id}`}
+          href="/orders"
           className="mx-4 -mt-2 mb-0 flex items-center gap-3 bg-green-600 text-white px-4 py-3 rounded-2xl shadow-lg"
           id="btn-active-order"
         >
