@@ -31,11 +31,13 @@ export default function LiveMap({
   useEffect(() => {
     if (!mapContainerRef.current) return
 
+    const initialCenter: [number, number] = pickupCoords || [105.257723, -5.381786]
+
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      center: [105.257723, -5.381786], // Universitas Teknokrat Indonesia, Bandar Lampung
-      zoom: 15,
+      center: initialCenter, // Auto-center to user's pickup or UTI
+      zoom: pickupCoords ? 16 : 15,
     })
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right')
@@ -138,8 +140,31 @@ export default function LiveMap({
     }
   }, [driverCoords, mapLoaded])
 
+  const handleRecenter = () => {
+    if (!mapRef.current) return
+    if (pickupCoords) {
+      mapRef.current.flyTo({ center: pickupCoords, zoom: 16, duration: 1000 })
+    } else if (typeof window !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const coords: [number, number] = [pos.coords.longitude, pos.coords.latitude]
+        mapRef.current?.flyTo({ center: coords, zoom: 16, duration: 1000 })
+      })
+    }
+  }
+
   return (
-    <div ref={mapContainerRef} style={{ width: '100%', height }} className="mapbox-container" />
+    <div className="relative w-full" style={{ height }}>
+      <div ref={mapContainerRef} style={{ width: '100%', height: '100%' }} className="mapbox-container" />
+      {/* Floating GPS re-center button */}
+      <button
+        type="button"
+        onClick={handleRecenter}
+        title="Pusatkan ke posisi saya"
+        className="absolute bottom-16 right-3 z-10 w-10 h-10 rounded-full bg-white text-uti-maroon shadow-lg border border-gray-100 flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-all"
+      >
+        <span className="text-lg">🎯</span>
+      </button>
+    </div>
   )
 }
 

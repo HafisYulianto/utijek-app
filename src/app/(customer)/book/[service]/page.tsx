@@ -61,6 +61,37 @@ export default function BookingPage() {
     })
   }, [])
 
+  // Auto-detect user's current GPS location on page mount
+  useEffect(() => {
+    if (typeof window === 'undefined' || !navigator.geolocation) return
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords
+        const coords: [number, number] = [longitude, latitude]
+        setPickupCoords(coords)
+
+        try {
+          const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+          const res = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${token}&language=id&limit=1`
+          )
+          const data = await res.json()
+          const placeName = data.features?.[0]?.place_name || 'Lokasi Saya Saat Ini'
+          const shortName = data.features?.[0]?.text || placeName.split(',')[0]
+          setPickupAddress(shortName)
+          toast.success(`📍 Lokasi jemput otomatis di posisi Anda: ${shortName}`, { id: 'gps-auto' })
+        } catch {
+          setPickupAddress('Lokasi Saya Saat Ini')
+        }
+      },
+      (err) => {
+        console.log('GPS autodetect skipped:', err.message)
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+    )
+  }, [])
+
   // Load pricing config
   useEffect(() => {
     ;(supabase
