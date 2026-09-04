@@ -43,8 +43,37 @@ export default function AdminSidebar() {
           priority
           className="h-6 w-auto object-contain brightness-0 invert"
         />
-        <span className="text-[11px] text-white/90 font-bold bg-white/15 px-2.5 py-0.5 rounded-full">Admin</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-white/90 font-bold bg-white/15 px-2.5 py-0.5 rounded-full">Admin</span>
+          <button
+            onClick={handleLogout}
+            id="btn-admin-mobile-logout"
+            className="text-[11px] font-semibold text-white/90 bg-black/20 hover:bg-black/40 border border-white/20 px-2 py-0.5 rounded-full transition-all"
+          >
+            Keluar
+          </button>
+        </div>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 safe-bottom">
+        <div className="flex items-center justify-around px-2 py-2">
+          {navItems.map((item) => {
+            const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href)
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={clsx('flex flex-col items-center flex-1 py-1', isActive ? 'text-uti-maroon font-bold' : 'text-gray-400')}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px] mt-0.5">{item.label}</span>
+              </Link>
+            )
+          })}
+        </div>
+      </nav>
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-64 flex-col bg-white border-r border-gray-100 shadow-sm z-40">

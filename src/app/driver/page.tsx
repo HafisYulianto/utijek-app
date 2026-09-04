@@ -112,6 +112,11 @@ export default function DriverDashboardPage() {
 
   const handleRejectOrder = () => { setPopupOrder(null) }
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Driver'
 
   return (
@@ -126,9 +131,18 @@ export default function DriverDashboardPage() {
             priority
             className="h-7 w-auto object-contain brightness-0 invert"
           />
-          <span className="text-[11px] font-bold text-white/90 bg-white/15 px-2.5 py-0.5 rounded-full">
-            Driver Partner
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-bold text-white/90 bg-white/15 px-2.5 py-0.5 rounded-full">
+              Driver Partner
+            </span>
+            <button
+              onClick={handleLogout}
+              id="btn-driver-logout"
+              className="text-[11px] font-semibold text-white/90 bg-black/20 hover:bg-black/40 border border-white/20 px-2.5 py-0.5 rounded-full transition-all"
+            >
+              Keluar
+            </button>
+          </div>
         </div>
         <div className="flex items-center justify-between mb-5">
           <div>
