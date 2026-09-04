@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import Button from '@/components/ui/Button'
@@ -34,12 +35,18 @@ export default function LoginPage() {
 
       <div className="relative w-full max-w-sm">
         {/* Logo */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-maroon-gradient shadow-maroon-lg mb-5">
-            <span className="text-4xl font-black text-white">U</span>
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-3">
+            <Image
+              src="/logo_teks.png"
+              alt="UTIJEK"
+              width={260}
+              height={90}
+              priority
+              className="h-20 w-auto object-contain drop-shadow-md"
+            />
           </div>
-          <h1 className="text-3xl font-black text-gray-900">UTIJEK</h1>
-          <p className="text-gray-500 mt-1.5 text-sm">
+          <p className="text-gray-500 text-sm">
             Layanan antar jemput lokal terpercaya
           </p>
         </div>

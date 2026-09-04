@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   title: 'UTIJEK - Ride Hailing Lokal',
   description: 'Aplikasi layanan antar jemput lokal: UTIJEK, UTIKAN, UTITIP, UTIBASING',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/logo_tanpateks.png',
+    shortcut: '/logo_tanpateks.png',
+    apple: '/logo_tanpateks.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -20,6 +25,7 @@ export const metadata: Metadata = {
     siteName: 'UTIJEK',
     title: 'UTIJEK - Ride Hailing Lokal',
     description: 'Layanan antar jemput orang, makanan, dan barang.',
+    images: [{ url: '/logo_teks.png' }],
   },
 }
 
@@ -39,6 +45,8 @@ export default function RootLayout({
   return (
     <html lang="id" className={inter.variable}>
       <head>
+        <link rel="icon" href="/logo_tanpateks.png" />
+        <link rel="apple-touch-icon" href="/logo_tanpateks.png" />
         <link rel="preconnect" href="https://api.mapbox.com" />
         <link rel="preconnect" href="https://events.mapbox.com" />
       </head>

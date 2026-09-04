@@ -116,10 +116,23 @@ export default function DriverDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-maroon-gradient px-5 pt-12 pb-6 safe-top">
+      <header className="bg-maroon-gradient px-5 pt-10 pb-6 safe-top">
+        <div className="flex items-center justify-between mb-4">
+          <Image
+            src="/logo_teks.png"
+            alt="UTIJEK"
+            width={120}
+            height={36}
+            priority
+            className="h-7 w-auto object-contain brightness-0 invert"
+          />
+          <span className="text-[11px] font-bold text-white/90 bg-white/15 px-2.5 py-0.5 rounded-full">
+            Driver Partner
+          </span>
+        </div>
         <div className="flex items-center justify-between mb-5">
           <div>
-            <p className="text-uti-maroon-200 text-xs">Halo,</p>
+            <p className="text-uti-maroon-200 text-xs font-medium">Halo,</p>
             <h1 className="text-white text-xl font-bold">{firstName} 👋</h1>
             <p className="text-uti-maroon-200 text-xs mt-0.5">
               {driverProfile?.vehicle_type} • {driverProfile?.vehicle_plate}

@@ -39,12 +39,16 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-maroon-gradient px-5 pt-12 pb-8 safe-top">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="text-uti-maroon-200 text-sm">Selamat datang,</p>
-            <h1 className="text-white text-xl font-bold">{firstName} 👋</h1>
-          </div>
+      <header className="bg-maroon-gradient px-5 pt-10 pb-8 safe-top">
+        <div className="flex items-center justify-between mb-4">
+          <Image
+            src="/logo_teks.png"
+            alt="UTIJEK"
+            width={130}
+            height={42}
+            priority
+            className="h-8 w-auto object-contain brightness-0 invert"
+          />
           <div className="flex items-center gap-3">
             <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors" id="btn-notifications">
               <BellIcon className="w-5 h-5" />
@@ -59,6 +63,11 @@ export default async function HomePage() {
               )}
             </div>
           </div>
+        </div>
+
+        <div className="mb-6">
+          <p className="text-uti-maroon-200 text-xs font-medium">Selamat datang,</p>
+          <h1 className="text-white text-xl font-bold">{firstName} 👋</h1>
         </div>
 
         <Link

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { clsx } from 'clsx'
 import {
@@ -33,22 +34,34 @@ export default function AdminSidebar() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-uti-maroon px-4 py-3 flex items-center justify-between">
-        <span className="font-black text-white text-lg">UTIJEK Admin</span>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-uti-maroon px-4 py-3 flex items-center justify-between shadow-md">
+        <Image
+          src="/logo_teks.png"
+          alt="UTIJEK"
+          width={110}
+          height={32}
+          priority
+          className="h-6 w-auto object-contain brightness-0 invert"
+        />
+        <span className="text-[11px] text-white/90 font-bold bg-white/15 px-2.5 py-0.5 rounded-full">Admin</span>
       </div>
 
       {/* Desktop sidebar */}
       <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-64 flex-col bg-white border-r border-gray-100 shadow-sm z-40">
         {/* Logo */}
-        <div className="px-6 py-6 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-maroon-gradient flex items-center justify-center">
-              <span className="font-black text-white text-lg">U</span>
-            </div>
-            <div>
-              <p className="font-black text-gray-900">UTIJEK</p>
-              <p className="text-xs text-uti-maroon font-semibold">Admin Panel</p>
-            </div>
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex flex-col gap-1">
+            <Image
+              src="/logo_teks.png"
+              alt="UTIJEK"
+              width={160}
+              height={50}
+              priority
+              className="h-9 w-auto object-contain"
+            />
+            <span className="text-[10px] uppercase tracking-wider text-uti-maroon font-bold pl-0.5">
+              Admin Superuser
+            </span>
           </div>
         </div>
 
