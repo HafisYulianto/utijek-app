@@ -6,6 +6,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'UTIJEK - Ride Hailing Lokal',
   description: 'Aplikasi layanan antar jemput lokal: UTIJEK, UTIKAN, UTITIP, UTIBASING',
   manifest: '/manifest.json',
