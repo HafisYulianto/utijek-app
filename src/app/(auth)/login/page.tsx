@@ -17,7 +17,6 @@ export default function LoginPage() {
       provider: 'google',
       options: {
         redirectTo: `${origin}/api/auth/callback`,
-        queryParams: { prompt: 'select_account' },
       },
     })
     if (error) {
