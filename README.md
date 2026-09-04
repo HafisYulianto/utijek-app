@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛵 UTIJEK - Progressive Web App (PWA) Ride-Hailing Platform
 
-## Getting Started
+Aplikasi ride-hailing modern berbasis **PWA (Progressive Web App)** yang dirancang untuk kebutuhan mobilitas kampus dan umum. Dilengkapi dengan 3 role terintegrasi: **Customer**, **Driver**, dan **Admin**, didukung oleh peta interaktif real-time, kalkulasi tarif dinamis, sistem chat live, dan dashboard analitik.
 
-First, run the development server:
+---
 
+## 🚀 Tech Stack
+
+- **Framework:** Next.js (App Router, Turbopack, PWA config via `next-pwa`)
+- **Backend & Auth:** Supabase (PostgreSQL, Supabase Auth, SSR, Realtime Subscriptions)
+- **Styling:** Tailwind CSS (Modern Glassmorphism & Micro-animations)
+- **Maps & Geolocation:** Mapbox GL & React Map GL
+- **Icons & UI:** Heroicons, React Hot Toast, Recharts
+- **State Management:** Zustand
+
+---
+
+## 🌟 Fitur Utama Berdasarkan Role
+
+### 1. 🛡️ Admin (Superuser)
+- **Dashboard Analitik:** Visualisasi statistik pesanan harian, mingguan, bulanan, dan total omset serta pendapatan platform.
+- **Manajemen Harga Dinamis:** Pengaturan tarif dasar, tarif per km, dan tarif per meter yang langsung disinkronkan ke kalkulasi Customer.
+- **Manajemen Akun Driver (CRUD Eksklusif):** Registrasi akun driver tertutup, aktivasi/suspend, dan penghapusan driver.
+- **Audit Transaksi:** Riwayat seluruh pesanan yang dapat difilter berdasarkan spesifik driver dan tanggal.
+
+### 2. 🛵 Driver Portal
+- **Dashboard Driver:** Ringkasan pendapatan harian, pesanan selesai, dan status online/offline.
+- **Toggle Online/Offline:** Kontrol ketersediaan driver yang otomatis memperbarui koordinat GPS secara berkala ke database.
+- **Order Popup Modal:** Notifikasi real-time ketika ada pesanan baru dengan hitung mundur dan rute pickup.
+- **Navigasi Interaktif & Trip Tracker:** Peta panduan belokan demi belokan (turn-by-turn), tombol *Tiba di Lokasi*, *Mulai Perjalanan*, dan *Selesaikan Pesanan*.
+
+### 3. 📱 Customer Experience (PWA)
+- **Home & Layanan Lengkap:** UTI-Ride (Motor), UTI-Car (Mobil), UTI-Food (Makanan), UTI-Send (Kurir Barang).
+- **Interactive Booking:** Penentuan titik jemput & antar dengan autocomplete atau pin pada peta Mapbox, kalkulasi jarak akurat, estimasi harga dinamis, serta pilihan metode pembayaran (Tunai, QRIS, Transfer).
+- **Live Chat Drawer:** Komunikasi langsung antara Customer dan Driver secara real-time via Supabase Realtime channel.
+- **PWA Ready:** Dapat diinstal di Android & iOS langsung dari browser dengan caching offline dan mobile-first UI.
+
+---
+
+## 🛠️ Panduan Instalasi & Menjalankan
+
+### 1. Clone Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/HafisYulianto/utijek-app.git
+cd utijek-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependensi
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Konfigurasi Environment Variables
+Salin file `.env.local.example` menjadi `.env.local`:
+```bash
+cp .env.local.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Isi variabel berikut dengan kredensial proyek Supabase & Mapbox Anda:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.your-mapbox-token
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-## Learn More
+### 4. Setup Database Supabase
+Jalankan skrip migrasi SQL di Supabase SQL Editor:
+- Lokasi file: `supabase/migrations/001_initial.sql`
 
-To learn more about Next.js, take a look at the following resources:
+Skrip ini akan membuat tabel:
+- `profiles` (User role: customer, driver, admin)
+- `driver_profiles` (Status online, kendaraan, lokasi realtime)
+- `pricing_config` (Tarif dinamis per meter & km)
+- `orders` (Siklus hidup pesanan)
+- `order_tracking` (Riwayat GPS tracking)
+- `chat_messages` (Chat realtime antara driver & customer)
+- `transactions` (Pencatatan pembayaran)
+- Serta fungsi PostgreSQL & triggers untuk update timestamp dan kalkulasi otomatis.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 5. Jalankan Development Server
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Buka [http://localhost:3000](http://localhost:3000) pada browser Anda.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📂 Struktur Proyek
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+utijek-app/
+├── public/
+│   └── manifest.json           # PWA Web App Manifest
+├── src/
+│   ├── app/
+│   │   ├── (auth)/login/       # Login & Autentikasi
+│   │   ├── (customer)/         # Halaman Customer (Home, Booking)
+│   │   ├── admin/              # Portal Admin (Analytics, Drivers, Pricing, Transaksi)
+│   │   ├── api/admin/          # Secure Server API (Create/Delete Driver via Service Role)
+│   │   ├── driver/             # Dashboard Driver & Navigasi Turn-by-Turn
+│   │   ├── globals.css         # Styling global & utility classes
+│   │   ├── layout.tsx          # Root layout & providers
+│   │   └── proxy.ts            # Next.js 16 Edge Proxy & Role Guards
+│   ├── components/
+│   │   ├── admin/              # Admin Sidebar & Analytics Charts
+│   │   ├── customer/           # BottomNav, ServiceCard, LiveChatDrawer
+│   │   ├── driver/             # DriverBottomNav, OnlineToggle, OrderPopup
+│   │   ├── map/                # Mapbox Live Tracking & Markers
+│   │   └── ui/                 # Reusable UI (Button, Card, Badge, Modal, Spinner)
+│   ├── hooks/                  # Custom hooks (Geolocation, Realtime Orders, Driver Location)
+│   ├── lib/
+│   │   ├── supabase/           # Client, Server, SSR Middleware, Types
+│   │   └── utils/              # Pricing calculation & Formatters
+│   └── types/                  # Database TypeScript schemas
+├── supabase/
+│   └── migrations/             # Migration SQL tables, RLS & triggers
+└── next.config.js              # PWA and Remote Patterns configuration
+```
+
+---
+
+## 📄 Lisensi
+Hak Cipta © 2026 UTIJEK Team. Dibuat untuk perkuliahan dan pengembangan teknologi mobilitas.
