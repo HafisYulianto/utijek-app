@@ -173,7 +173,7 @@ export default function CustomerOrdersPage() {
 
                   {isActive ? (
                     <Link
-                      href={`/book/${order.service_type}`}
+                      href={`/trip/${order.id}`}
                       className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded-xl shadow-sm hover:bg-green-700 transition-colors"
                     >
                       Pantau Trip
