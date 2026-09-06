@@ -19,6 +19,8 @@ const navItems = [
 
 export default function DriverBottomNav() {
   const pathname = usePathname()
+  // Hide bottom nav on navigation/trip page so it doesn't block action buttons
+  if (pathname?.startsWith('/driver/navigation')) return null
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 safe-bottom" style={{ maxWidth: '28rem', margin: '0 auto' }}>
       <div className="flex items-center justify-around px-2 py-2">

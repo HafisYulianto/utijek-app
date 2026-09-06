@@ -50,6 +50,7 @@ export default function BookingPage() {
   const [chatOpen, setChatOpen] = useState(false)
   const [userId, setUserId] = useState<string>('')
   const [itemDetails, setItemDetails] = useState('')
+  const [driverInfo, setDriverInfo] = useState<{ full_name: string | null; phone: string | null; vehicle_type: string; vehicle_plate: string; vehicle_color: string | null } | null>(null)
 
   const isUTIBASING = serviceType === 'utibasing'
   const needsDropoff = serviceType !== 'utibasing'
@@ -123,11 +124,25 @@ export default function BookingPage() {
   useRealtimeOrders({
     role: 'customer',
     customerId: userId,
-    onOrderUpdate: (order) => {
+    onOrderUpdate: async (order) => {
       setCurrentOrder(order)
       if (order.status === 'accepted') {
         setStep('active')
         toast.success('Driver ditemukan! Sedang menuju lokasi Anda.')
+        // Fetch driver info
+        if (order.driver_id) {
+          const supabaseClient = createClient()
+          const [{ data: prof }, { data: dp }] = await Promise.all([
+            (supabaseClient.from('profiles').select('full_name, phone').eq('id', order.driver_id).single() as any),
+            (supabaseClient.from('driver_profiles').select('vehicle_type, vehicle_plate, vehicle_color').eq('id', order.driver_id).single() as any),
+          ])
+          if (prof && dp) {
+            setDriverInfo({ ...prof, ...dp })
+          }
+        }
+      }
+      if (order.status === 'on_trip') {
+        toast('Driver dalam perjalanan mengantar Anda!', { icon: '🏁' })
       }
       if (order.status === 'completed') {
         toast.success('Perjalanan selesai! Terima kasih.')
@@ -483,25 +498,57 @@ export default function BookingPage() {
             <div className="space-y-4">
               <OrderStatusBadge status={currentOrder.status} />
 
+              {/* Driver info card */}
+              {driverInfo && (
+                <div className="bg-uti-maroon-50 border border-uti-maroon-100 rounded-2xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-uti-maroon flex items-center justify-center flex-shrink-0">
+                    <span className="text-white font-black text-base">
+                      {driverInfo.full_name?.charAt(0)?.toUpperCase() || 'D'}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 text-sm truncate">{driverInfo.full_name || 'Driver'}</p>
+                    <p className="text-xs text-gray-500">
+                      {driverInfo.vehicle_color ? `${driverInfo.vehicle_color} · ` : ''}
+                      {driverInfo.vehicle_type} · <span className="font-bold text-uti-maroon">{driverInfo.vehicle_plate}</span>
+                    </p>
+                  </div>
+                  {driverInfo.phone && (
+                    <a
+                      href={`tel:${driverInfo.phone}`}
+                      className="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0"
+                      id="btn-call-driver"
+                    >
+                      <span className="text-lg">📞</span>
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* Route summary */}
               <div className="bg-gray-50 rounded-xl divide-y divide-gray-100">
                 <div className="flex items-center gap-3 px-3 py-3">
-                  <MapPinIcon className="w-4 h-4 text-uti-maroon flex-shrink-0" />
-                  <span className="text-sm text-gray-700 truncate">{currentOrder.pickup_address}</span>
+                  <span className="text-uti-maroon text-lg">📍</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] text-gray-400 font-semibold uppercase">Jemput</p>
+                    <p className="text-sm text-gray-700 truncate">{currentOrder.pickup_address}</p>
+                  </div>
                 </div>
                 {currentOrder.dropoff_address && (
                   <div className="flex items-center gap-3 px-3 py-3">
-                    <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                    <span className="text-blue-500 text-lg">🏁</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase">Antar</p>
+                      <p className="text-sm text-gray-700 truncate">{currentOrder.dropoff_address}</p>
                     </div>
-                    <span className="text-sm text-gray-700 truncate">{currentOrder.dropoff_address}</span>
                   </div>
                 )}
               </div>
 
               {currentOrder.estimated_price && (
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center bg-gray-50 rounded-xl px-4 py-3">
                   <span className="text-sm text-gray-500">Estimasi Harga</span>
-                  <span className="font-bold text-uti-maroon">{formatCurrency(currentOrder.estimated_price)}</span>
+                  <span className="font-black text-uti-maroon text-base">{formatCurrency(currentOrder.estimated_price)}</span>
                 </div>
               )}
 
