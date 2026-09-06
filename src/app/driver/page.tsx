@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { useRealtimeOrders } from '@/hooks/useRealtimeOrders'
@@ -22,10 +22,12 @@ export default function DriverDashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [driverProfile, setDriverProfile] = useState<DriverProfile | null>(null)
   const [isOnline, setIsOnline] = useState(false)
+  const isOnlineRef = useRef(false) // Ref to avoid stale closure in realtime callback
   const [popupOrder, setPopupOrder] = useState<Order | null>(null)
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [todayEarnings, setTodayEarnings] = useState(0)
   const [userId, setUserId] = useState<string>('')
+  const userIdRef = useRef<string>('')
 
   useEffect(() => {
     const init = async () => {
@@ -41,8 +43,11 @@ export default function DriverDashboardPage() {
       if (prof) setProfile(prof as Profile)
       if (driverProf) {
         setDriverProfile(driverProf as DriverProfile)
-        setIsOnline((driverProf as DriverProfile).is_online)
+        const online = (driverProf as DriverProfile).is_online
+        setIsOnline(online)
+        isOnlineRef.current = online
       }
+      userIdRef.current = user.id
 
       const { data: orders } = await (supabase
         .from('orders')
@@ -73,8 +78,12 @@ export default function DriverDashboardPage() {
   useRealtimeOrders({
     role: 'driver',
     driverId: userId,
+    // Use ref so callback always reads the CURRENT isOnline value, not stale closure
     onNewOrder: (order) => {
-      if (isOnline) setPopupOrder(order)
+      if (isOnlineRef.current) {
+        setPopupOrder((prev) => prev ?? order) // Show only if no popup currently
+        toast('🔔 Ada pesanan baru masuk!', { icon: '📦', id: `order-${order.id}` })
+      }
     },
   })
 
@@ -89,7 +98,26 @@ export default function DriverDashboardPage() {
 
     if (!error) {
       setIsOnline(value)
+      isOnlineRef.current = value // Keep ref in sync
       toast.success(value ? '🟢 Kamu sekarang Online!' : '🔴 Kamu Offline')
+
+      // When going online, immediately poll for existing pending orders
+      if (value) {
+        const { data: existingOrders } = await (supabase
+          .from('orders')
+          .select('*')
+          .eq('status', 'pending')
+          .is('driver_id', null)
+          .order('created_at', { ascending: true })
+          .limit(1) as any)
+
+        if (existingOrders && existingOrders.length > 0) {
+          setPopupOrder(existingOrders[0] as Order)
+          toast('🔔 Ada pesanan yang menunggu!', { icon: '📦', id: 'pending-poll' })
+        }
+      } else {
+        setPopupOrder(null)
+      }
     }
   }
 
