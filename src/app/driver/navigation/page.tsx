@@ -217,7 +217,7 @@ export default function DriverNavigationPage() {
       </div>
 
       {/* BOTTOM PANEL — scrollable */}
-      <div className="flex-1 bg-white rounded-t-3xl shadow-2xl overflow-y-auto">
+      <div className="flex-1 bg-white rounded-t-3xl shadow-2xl scroll-panel min-h-0">
         <div className="px-5 pt-4 pb-8">
           {/* Trip meter (on_trip) */}
           {phase === 'on_trip' && (

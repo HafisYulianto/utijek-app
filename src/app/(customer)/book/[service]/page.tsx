@@ -305,6 +305,7 @@ export default function BookingPage() {
         className={`bottom-sheet transition-all duration-300 ${
           sheetExpanded ? '' : 'translate-y-[calc(100%-5rem)]'
         }`}
+        style={{ maxHeight: sheetExpanded ? '70vh' : undefined }}
       >
         {/* Drag handle */}
         <button
@@ -318,7 +319,7 @@ export default function BookingPage() {
           />
         </button>
 
-        <div className="px-5 pb-8 max-h-[55vh] overflow-y-auto scrollbar-hide">
+        <div className="px-5 pb-8 scrollbar-hide scroll-panel" style={{ maxHeight: 'calc(70vh - 56px)' }}>
           {/* INPUT STEP */}
           {step === 'input' && (
             <div className="space-y-4">
